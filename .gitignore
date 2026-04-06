@@ -43,3 +43,10 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+
+### Spring Boot ###
+application-local.properties
+application-dev.properties
+application-prod.properties
+*.log
+logs/

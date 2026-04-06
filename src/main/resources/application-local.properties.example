@@ -1,0 +1,10 @@
+# Local development configuration
+# Copy this file to application-local.properties and update with your actual values
+
+spring.datasource.url=jdbc:mysql://localhost:3306/product_management
+spring.datasource.username=your_mysql_username
+spring.datasource.password=your_mysql_password
+
+# Optional: Override other properties for local development
+# spring.jpa.show-sql=true
+# spring.jpa.hibernate.ddl-auto=create-drop
