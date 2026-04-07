@@ -2,6 +2,24 @@
 
 A full-stack web application for managing products with a Spring Boot backend and React frontend.
 
+## Project Structure
+
+```
+ProductManagementApplication/
+├── backend/                    # Spring Boot backend server
+│   ├── src/                   # Java source code
+│   ├── pom.xml               # Maven configuration
+│   ├── mvnw                  # Maven wrapper script
+│   └── target/               # Build output
+├── frontend/                  # React frontend application
+│   ├── src/                  # React components and pages
+│   ├── public/               # Static assets
+│   └── package.json          # NPM configuration
+├── demos/                     # Demo videos and documentation
+├── sample_products.csv        # Sample CSV file for import testing
+└── README.md                  # This file
+```
+
 ## Features
 
 - ✅ Complete CRUD operations for products
@@ -37,7 +55,7 @@ A full-stack web application for managing products with a Spring Boot backend an
    ```
 
 2. Configure your database credentials:
-   - Copy `src/main/resources/application-local.properties.example` to `src/main/resources/application-local.properties`
+   - Copy `backend/src/main/resources/application-local.properties.example` to `backend/src/main/resources/application-local.properties`
    - Update the database credentials in `application-local.properties`:
      ```properties
      spring.datasource.username=your_mysql_username
@@ -54,9 +72,9 @@ A full-stack web application for managing products with a Spring Boot backend an
 
 ### Backend (Spring Boot)
 
-1. Navigate to the project root:
+1. Navigate to the backend directory:
    ```bash
-   cd ProductManagementApplication
+   cd backend
    ```
 
 2. Run the Spring Boot application:
@@ -70,7 +88,7 @@ A full-stack web application for managing products with a Spring Boot backend an
 
 1. Navigate to the frontend directory:
    ```bash
-   cd product-management-frontend
+   cd frontend
    ```
 
 2. Install dependencies:
@@ -89,14 +107,17 @@ A full-stack web application for managing products with a Spring Boot backend an
 
 ### Backend
 ```bash
+cd backend
 ./mvnw clean package
 java -jar target/ProductManagementApplication-0.0.1-SNAPSHOT.jar
 ```
 
 ### Frontend
 ```bash
+cd frontend
 npm run build
 ```
+
 
 ## API Endpoints
 
@@ -107,10 +128,20 @@ npm run build
 - `DELETE /api/products/{id}` - Delete product
 - `GET /api/categories` - Get all categories
 
+## Sample Data
+
+A sample CSV file with 20 products is included (`sample_products.csv`) for testing the import functionality. You can import this file through the application's import feature.
+
+## Demo Videos
+
+Demo videos showcasing the application features are located in the `demos/` folder:
+- Place your demo videos or screen recordings in this folder
+- Include a `DEMO.md` file with descriptions of each demo
+
 ## Security Notes
 
 - Database credentials are NOT committed to version control
-- Use `application-local.properties` for local development
+- Use `backend/src/main/resources/application-local.properties` for local development
 - Never commit sensitive configuration files
 - Use environment variables in production
 
