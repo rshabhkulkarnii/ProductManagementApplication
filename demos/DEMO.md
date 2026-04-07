@@ -18,7 +18,3 @@ This folder contains demonstration videos of the Product Management Application 
 - **File:** `advanced-features.mp4`
 - **Duration:** ~4 minutes
 - **Description:** Bulk actions, export/import, sorting, and filtering
-
-## How to Watch
-
-Simply download the videos from this folder and play them with your favorite video player, or watch them directly on GitHub by clicking on the video files.
