@@ -1,210 +1,123 @@
 package com.product.ProductManagementApplication.Controller;
 
-import com.product.ProductManagementApplication.Service.ProductService;
 import com.product.ProductManagementApplication.dto.ProductCreateRequest;
 import com.product.ProductManagementApplication.dto.ProductResponse;
-import com.product.ProductManagementApplication.dto.ProductUpdateRequest;
+import com.product.ProductManagementApplication.Service.FirebaseProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.math.BigDecimal;
 
+/**
+ * Product REST Controller
+ * Uses Firebase Firestore instead of MySQL
+ */
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-
-    private final ProductService productService;
-
-    public ProductController(ProductService productService) {
-        this.productService = productService;
-    }
-
+    
+    @Autowired
+    private FirebaseProductService firebaseProductService;
+    
+    /**
+     * Get all products with pagination
+     */
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
-
-        // Validate pagination parameters
-        if (page < 0) {
-            page = 0;  // Reset to default if negative
-        }
-        if (size <= 0) {
-            size = 10;  // Reset to default if invalid
-        }
-        if (size > 100) {
-            size = 100;  // Limit max size to prevent large queries
-        }
-
-        // Create Sort object based on sortDirection
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
-
-        // Create Pageable object with page, size, and sort
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        // Call service method
-        Page<ProductResponse> products = productService.getAllProducts(pageable);
-
-        // Return with 200 OK status
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductResponse> products = firebaseProductService.getAllProducts(pageable);
         return ResponseEntity.ok(products);
     }
-
+    
+    /**
+     * Get product by ID
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-
-        // Call service method (throws ProductNotFoundException if not found)
-        ProductResponse product = productService.getProductById(id);
-
-        // Return with 200 OK status
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable String id) {
+        ProductResponse product = firebaseProductService.getProductById(id);
         return ResponseEntity.ok(product);
     }
-
+    
+    /**
+     * Create product
+     */
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductCreateRequest request) {
-
-        // Call service method (throws InvalidProductException if invalid)
-        ProductResponse createdProduct = productService.createProduct(request);
-
-        // Return with 201 Created status
-        // 201 indicates the resource was successfully created
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
+        ProductResponse product = firebaseProductService.createProduct(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
-
+    
+    /**
+     * Update product
+     */
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> updateProduct(
-            @PathVariable Long id,
-            @RequestBody ProductUpdateRequest request) {
-
-        // Call service method (throws ProductNotFoundException or InvalidProductException)
-        ProductResponse updatedProduct = productService.updateProduct(id, request);
-
-        // Return with 200 OK status
-        return ResponseEntity.ok(updatedProduct);
+            @PathVariable String id,
+            @RequestBody ProductCreateRequest request) {
+        
+        ProductResponse product = firebaseProductService.updateProduct(id, request);
+        return ResponseEntity.ok(product);
     }
-
+    
+    /**
+     * Delete product
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-
-        // Call service method (throws ProductNotFoundException if not found)
-        productService.deleteProduct(id);
-
-        // Return with 204 No Content status
-        // 204 means success but no content to return
+    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
+        firebaseProductService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
-
+    
+    /**
+     * Search products by keyword
+     */
     @GetMapping("/search")
     public ResponseEntity<Page<ProductResponse>> searchProducts(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
-
-        // Validate pagination parameters
-        if (page < 0) {
-            page = 0;
-        }
-        if (size <= 0) {
-            size = 10;
-        }
-        if (size > 100) {
-            size = 100;
-        }
-
-        // Create Sort object
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
-
-        // Create Pageable
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        // Call service method (throws InvalidProductException if keyword is empty)
-        Page<ProductResponse> searchResults = productService.searchProducts(keyword, pageable);
-
-        // Return with 200 OK
-        return ResponseEntity.ok(searchResults);
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductResponse> results = firebaseProductService.searchProducts(keyword, pageable);
+        return ResponseEntity.ok(results);
     }
-
+    
+    /**
+     * Filter by price range
+     */
     @GetMapping("/filter/price-range")
-    public ResponseEntity<Page<ProductResponse>> getProductsByPriceRange(
+    public ResponseEntity<Page<ProductResponse>> filterByPriceRange(
             @RequestParam BigDecimal minPrice,
             @RequestParam BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
-
-        // Validate pagination parameters
-        if (page < 0) {
-            page = 0;
-        }
-        if (size <= 0) {
-            size = 10;
-        }
-        if (size > 100) {
-            size = 100;
-        }
-
-        // Create Sort object
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
-
-        // Create Pageable
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        // Call service method (throws InvalidProductException if range is invalid)
-        Page<ProductResponse> priceRangeResults = productService.getProductsByPriceRange(
-                minPrice, maxPrice, pageable);
-
-        // Return with 200 OK
-        return ResponseEntity.ok(priceRangeResults);
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductResponse> results = firebaseProductService
+            .getProductsByPriceRange(minPrice, maxPrice, pageable);
+        return ResponseEntity.ok(results);
     }
-
+    
+    /**
+     * Get low stock products
+     */
     @GetMapping("/filter/low-stock")
     public ResponseEntity<Page<ProductResponse>> getLowStockProducts(
             @RequestParam Integer threshold,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "quantity") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDirection) {
-
-        // Validate pagination parameters
-        if (page < 0) {
-            page = 0;
-        }
-        if (size <= 0) {
-            size = 10;
-        }
-        if (size > 100) {
-            size = 100;
-        }
-
-        // Create Sort object
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
-
-        // Create Pageable
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        // Call service method (throws InvalidProductException if threshold is invalid)
-        Page<ProductResponse> lowStockResults = productService.getLowStockProducts(threshold, pageable);
-
-        // Return with 200 OK
-        return ResponseEntity.ok(lowStockResults);
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductResponse> results = firebaseProductService
+            .getLowStockProducts(threshold, pageable);
+        return ResponseEntity.ok(results);
     }
 }

@@ -28,13 +28,13 @@ public class ProductService {
     private ProductResponse convertEntityToResponse(Product product) {
         ProductResponse productResponse = new ProductResponse();
 
-        productResponse.setId(product.getId());
+        productResponse.setId(Long.parseLong(product.getId().replaceAll("[^0-9]", "0")));
         productResponse.setName(product.getName());
         productResponse.setDescription(product.getDescription());
         productResponse.setPrice(product.getPrice());
         productResponse.setQuantity(product.getQuantity());
-        productResponse.setCreatedAt(product.getCreationDate());
-        productResponse.setUpdatedAt(product.getUpdateDate());
+        productResponse.setCreatedAt(product.getCreatedAt());
+        productResponse.setUpdatedAt(product.getUpdatedAt());
 
         return productResponse;
     }
